@@ -7,7 +7,7 @@ Este documento detalha a rastreabilidade do projeto, as regras de negócio, a es
 ## 1. Rastreabilidade e Gestão Ágil
 
 * **Quadro Kanban no Trello:** [inserir link do Trello]
-* **Documentação Interativa no Notion:** [inserir link do Notion]
+
 
 ---
 
