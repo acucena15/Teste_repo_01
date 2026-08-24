@@ -1,79 +1,71 @@
-# Relatório de Arquitetura e Modelagem — Rota Escolar
+# Relatório de Arquitetura e Modelagem - CTBJ Conecta
 
-Este documento apresenta a estrutura técnica, a matriz de permissões (RBAC), as regras de negócio e os diagramas de modelagem do sistema **Rota Escolar**.
+Este documento detalha a rastreabilidade do projeto, as regras de negócio, a estrutura de permissões (RBAC) e os diagramas de modelagem do sistema CTBJ Conecta.
 
 ---
 
-## 1. Matriz de Permissões (RBAC)
+## 1. Rastreabilidade e Gestão Ágil
 
-| Perfil | Cadastrar Alunos/Motoristas | Criar Rotas e Pontos | Visualizar Rota e Alunos | Registrar Embarque |
+* **Quadro Kanban no Trello:** https://trello.com/invite/b/Y9bM6m6r/ATTI6b2d572005ceec848f55124a1647f62bF0EF9FF9/pi-ctbj-conecta-
+* **Documentação Interativa no Notion:** https://absorbed-currency-75a.notion.site/PI2-CTBJ-Conecta-Reserva-de-Salas-e-Recursos-3c20b479d9ef8010af85feef5c614b82?source=copy_link
+
+---
+
+## 2. Matriz de Permissões (RBAC)
+
+| Papel | Reservar Equipamento | Reservar Espaço | Aprovar Reserva | Cadastrar Recursos |
 | :--- | :---: | :---: | :---: | :---: |
-| **Escola** | ✅ | ✅ | ✅ | ❌ |
-| **Motorista** | ❌ | ❌ | ✅ | ✅ |
+| **Aluno** | ✅ | ❌ | ❌ | ❌ |
+| **Professor** | ✅ | ✅ | ❌ | ❌ |
+| **Coordenador** | ✅ | ✅ | ✅ | ❌ |
+| **Diretor / Administrador** | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
-## 2. Regras de Negócio e Segurança
+## 3. Regras de Negócio e Segurança
 
-* **Atribuição de Rota:** Cada motorista é associado a uma única rota por vez.
-* **Vínculo do Aluno:** O aluno deve estar vinculado obrigatoriamente a uma Rota e a um Ponto de Embarque específico.
-* **Restrição de Embarque:** Apenas o perfil Motorista possui permissão para registrar e salvar a presença/embarque dos alunos.
-* **Simplicidade do Escopo:** O sistema foca estritamente na gestão do transporte escolar, sem integração de GPS ou sistemas externos.
+* **Solicitação de Reservas:** Alunos só podem solicitar equipamentos. Professores e Coordenadores podem solicitar espaços físicos (salas/laboratórios).
+* **Aprovação Obrigatória:** Nenhuma reserva é confirmada automaticamente; todas passam por validação do Coordenador ou Diretor responsável.
+* **Política de Conflitos:** O sistema não permite agendamentos duplos para o mesmo recurso no mesmo horário.
+* **Restrição do Diretor:** Apenas o Diretor/Administrador possui acesso total para cadastrar e alterar a estrutura do sistema.
 
 ---
 
-## 3. Fluxograma do Processo de Embarque (Motorista)
+## 4. Fluxograma do Processo de Reserva
 
 ```mermaid
 graph TD
-    A[Inicio: Login do Motorista] --> B[Acessar Menu Principal]
-    B --> C[Consultar Minha Rota]
-    C --> D[Visualizar Pontos de Embarque]
-    D --> E[Selecionar Ponto Atual]
-    E --> F[Visualizar Lista de Alunos]
-    F --> G{Aluno Embarcou?}
-    G -- Sim --> H[Marcar como Embarcou]
-    G -- Nao --> I[Marcar como Nao Embarcou]
-    H --> J[Salvar Registro de Embarque]
-    I --> J
-
+    A[Inicio: Usuario solicita reserva] --> B{Possui permissao?}
+    B -- Nao --> C[Exibir mensagem de erro]
+    B -- Sim --> D{Recurso disponivel?}
+    D -- Nao --> E[Notificar indisponibilidade]
+    D -- Sim --> F[Encaminhar para aprovacao]
+    F --> G{Aprovado pelo Coordenador?}
+    G -- Nao --> H[Reserva Recusada]
+    G -- Sim --> I[Reserva Confirmada]
 erDiagram
-    MOTORISTA ||--o| ROTA : conduz
-    ROTA ||--|{ PONTO_EMBARQUE : possui
-    ROTA ||--|{ ALUNO : atende
-    PONTO_EMBARQUE ||--|{ ALUNO : embarca
-    ALUNO ||--o{ REGISTRO_EMBARQUE : possui
+    USUARIO ||--o{ RESERVA : faz
+    RECURSO ||--o{ RESERVA : contem
 
-    MOTORISTA {
-        int id_motorista PK
+    USUARIO {
+        int id_usuario PK
         string nome
-        string telefone
+        string email
+        string papel
     }
 
-    ROTA {
-        int id_rota PK
-        string nome_rota
-        int id_motorista FK
-    }
-
-    PONTO_EMBARQUE {
-        int id_ponto PK
-        string nome_ponto
-        int ordem
-        int id_rota FK
-    }
-
-    ALUNO {
-        int id_aluno PK
+    RECURSO {
+        int id_recurso PK
         string nome
-        date data_nascimento
-        int id_rota FK
-        int id_ponto FK
+        string tipo
+        string status
     }
 
-    REGISTRO_EMBARQUE {
-        int id_registro PK
-        int id_aluno FK
-        date data_registro
-        string status_embarque
+    RESERVA {
+        int id_reserva PK
+        int id_usuario FK
+        int id_recurso FK
+        datetime data_inicio
+        datetime data_fim
+        string status
     }
