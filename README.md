@@ -43,6 +43,11 @@ graph TD
     G -- Nao --> I[Marcar como Nao Embarcou]
     H --> J[Salvar Registro de Embarque]
     I --> J
+```
+
+## 5. Modelo Entidade-Relacionamento (ER)
+
+```mermaid
 erDiagram
     MOTORISTA ||--o{ ROTA : conduz
     ROTA ||--o{ ALUNO : atende
@@ -82,3 +87,4 @@ erDiagram
         date data_registro
         string status_embarque
     }
+```
